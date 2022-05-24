@@ -1,0 +1,277 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+class BT {
+	struct Node
+	{
+		int key;
+		std::string info;
+		Node* left = nullptr, * right = nullptr;
+		Node(int key, std::string info) : key(key), info(info) {};
+	} *root = nullptr;
+
+	void print(Node* n, int len) {
+		if (!n) return;
+		if (n->right) print(n->right, len + 5);
+		for (size_t i = 0; i < len; i++)
+		{
+			std::cout << " ";
+		} std::cout << n->key << "/" << n->info << "\n";
+
+		if (n->left) print(n->left, len + 5);
+	}
+	void printSmallToBig(Node* n) {
+		if (!n)return;
+		if (n->right) printSmallToBig(n->left);
+		std::cout << n->key << "/" << n->info << "\n";
+		if (n->right) printSmallToBig(n->right);
+	}
+	void printStraight(Node* n) {
+		if (!n) return;
+		std::cout << n->key << "/" << n->info << "\n";
+		printStraight(n->left);
+		printStraight(n->right);
+	}
+	void printReverse(Node* n) {
+		if (!n) return;
+		printReverse(n->left);
+		printReverse(n->right);
+		std::cout << n->key << "/" << n->info << "\n";
+	}
+	void fillTmp(std::vector<std::pair<int, std::string>>& tmp, Node* n) {
+		if (!n) return;
+		fillTmp(tmp, n->left);
+		fillTmp(tmp, n->right);
+		tmp.push_back(std::pair<int, std::string>(n->key, n->info));
+	}
+	void del(Node* n) {
+		if (!n) return;
+		del(n->left);
+		del(n->right);
+		Node* curr = n;
+		n->left = n->right = nullptr;
+		n = nullptr;
+		delete curr;
+	}
+	void fillFromTmp(std::vector<std::pair<int, std::string>>tmp, int f, int l) {
+		if (f > l) return;
+		add(tmp.at((f + l) / 2).first, tmp.at((f + l) / 2).second);
+		fillFromTmp(tmp, f, (f + l) / 2 - 1);
+		fillFromTmp(tmp, (f + l) / 2 + 1, l);
+	}
+
+	int NodeCounter(Node* n)
+	{
+		if (n == NULL)
+			return 0;
+		int tr = ((n->left != NULL) && (n->right != NULL));
+		if (n->left != NULL)
+			tr += NodeCounter(n->left);
+		if (n->right != NULL);
+		tr += NodeCounter(n->right);
+	}
+
+public:
+
+	int NodeCounter()
+	{
+		return NodeCounter(root);
+	}
+
+	void add(int key, std::string info) {
+		if (!root) {
+			root = new Node(key, info);
+			return;
+		}
+		Node* curr = root;
+		while (curr) {
+			if (curr->key < key && !curr->right) {
+				curr->right = new Node(key, info);
+				return;
+			}
+			else if (curr->key > key && !curr->left) {
+				curr->left = new Node(key, info);
+				return;
+			}
+			if (curr->key > key) {
+				curr = curr->left;
+			}
+			else {
+				curr = curr->right;
+			}
+		}
+	}
+
+	std::pair<bool, std::string> contains(int key) {
+		Node* curr = root;
+		while (curr) {
+			if (key == curr->key) return std::pair<bool, std::string>(true, curr->info);
+			if (key < curr->key) curr = curr->left;
+			else curr = curr->right;
+		}
+		return std::pair<bool, std::string>(false, "There isn't element with this key in the tree!");
+	}
+	void erase(int key) {
+		Node* curr = root, * prev = nullptr;
+
+		if (root && root->key == key) {
+			if (!root->right && !root->left) {
+				root = nullptr;
+				delete curr;
+			}
+			if (root->right) {
+				root = root->right;
+				root->left = curr->left;
+				root->right = curr->right->right;
+				delete curr;
+				return;
+			}
+			else {
+				root = root->left;
+				root->left = curr->left->left;
+				delete curr;
+			}
+			return;
+		}
+
+		while (curr) {
+			if (key == curr->key) {
+				if (!curr->left && !curr->right) {
+					if (curr == prev->left) prev->left = nullptr;
+					else prev->right = nullptr;
+					delete curr;
+					return;
+				}
+				if (!curr->left) {
+					if (curr == prev->left) prev->left = curr->right;
+					else prev->right = curr->right;
+					delete curr;
+					return;
+				}
+				if (!curr->right) {
+					if (curr == prev->left) prev->left = curr->left;
+					else prev->right = curr->left;
+					delete curr;
+					return;
+				}
+				Node* biggestLeft = curr->left, * preBiggestLeft = nullptr;
+				while (biggestLeft->right) {
+					preBiggestLeft = biggestLeft;
+					biggestLeft = biggestLeft->right;
+				}
+				if (preBiggestLeft) {
+					preBiggestLeft->right = biggestLeft->left;
+					biggestLeft->left = curr->left;
+					biggestLeft->right = curr->right;
+				}
+				else biggestLeft->right = curr->right;
+				if (prev && prev->left == curr) prev->left = biggestLeft;
+				else if (prev) prev->right = biggestLeft;
+				delete curr;
+				return;
+			}
+			else if (key > curr->key) {
+				prev = curr;
+				curr = curr->right;
+			}
+			else {
+				prev = curr;
+				curr = curr->left;
+			}
+		}
+		std::cout << "There isn't element with key " << key << " in the tree!\n";
+	}
+
+	void print() {
+		if (!root) {
+			std::cout << "Tree is empty!\n";
+			return;
+		}
+		int key; std::cout << "----------------------\n1 - simple print\n2 - small to big\n3 - straight\n4 - reverse\n----------------------\n"; std::cin >> key; std::cout << std::endl;
+		switch (key)
+		{
+		case 1:
+			print(root, 5);
+			break;
+		case 2:
+			printSmallToBig(root);
+			break;
+		case 3:
+			printStraight(root);
+			break;
+		case 4:
+			printReverse(root);
+			break;
+		default:
+			break;
+		}
+	}
+	void balance() {
+		std::vector<std::pair<int, std::string>>tmp;
+		fillTmp(tmp, root);
+		sort(tmp.begin(), tmp.end());
+		del(root); root = nullptr;
+		int first = 0, last = tmp.size() - 1;
+		fillFromTmp(tmp, first, last);
+	}
+};
+
+int main()
+{
+	BT tree;
+
+	while (true) {
+		int switch_on; std::cout << "----------------------\n1 - make random tree\n2 - balance tree\n3 - add node\n4 - find node\n5 - delete node\n6 - print tree\n7 - task\n8 - exit\n----------------------\nyour choice: "; std::cin >> switch_on; std::cout << std::endl;
+		switch (switch_on)
+		{
+		case 1: {
+			int length; std::cout << "Input the number of nodes: "; std::cin >> length;
+			for (size_t i = 0; i < length; i++)
+			{
+				int n = rand() % 101;
+				tree.add(n, "test");
+			}
+			break;
+		}
+		case 2: {
+			tree.balance();
+			break;
+		}
+		case 3: {
+			int n; std::string str;
+			std::cout << "Input key: "; std::cin >> n;
+			std::cout << "Input info: "; std::cin.ignore(); std::getline(std::cin, str);
+			tree.add(n, str);
+			break;
+		}
+		case 4: {
+			int n; std::cout << "Input key: "; std::cin >> n;
+			if (tree.contains(n).first) std::cout << "Info: ";
+			std::cout << tree.contains(n).second << std::endl;
+			break;
+		}
+		case 5: {
+			int n; std::cout << "Input key: "; std::cin >> n;
+			tree.erase(n);
+			break;
+		}
+		case 6: {
+			tree.print();
+			break;
+		}
+		case 7: {
+			int n = 0;
+			std::cout << "Number of nodes that have 2 daughters  : " << tree.NodeCounter() << std::endl;;
+			break;
+		}
+		case 8: {
+			return 0;
+		}
+		default:
+			break;
+		}
+	}
+}
+
