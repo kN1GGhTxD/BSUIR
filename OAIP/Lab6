@@ -1,0 +1,229 @@
+#include <iostream>
+using namespace std;
+struct Queue
+{
+    int value;
+    Queue* prev_element, * next_element;
+    Queue* begin;
+    Queue* end;
+};
+
+void Create(Queue*&, Queue*, int);
+void Push_Begin(Queue*&, int);
+void Print_Begin(Queue*);
+void Print_End(Queue*);
+void Clear(Queue*&);
+void Delete(Queue*);
+
+void Create(Queue*& queue, Queue* element, int value)
+{
+    if (!queue)
+    {
+        queue = new Queue;
+        queue->value = value;
+        queue->next_element = NULL;
+        queue->prev_element = element;
+    }
+    else Create(queue->next_element, queue, value);
+}
+void Push_Begin(Queue*& queue, int value)
+{
+    Queue* temp;
+    temp = new Queue;
+    temp->prev_element = NULL;
+    temp->next_element = queue;
+    temp->value = value;
+    if (queue)
+    {
+        queue->prev_element = temp;
+    }
+    queue = temp;
+}
+
+void Push_End(Queue*& queue, int value)
+{
+    Queue* temp;
+    temp = new Queue;
+    temp->next_element = NULL;
+    temp->prev_element = queue;
+    temp->value = value;
+    if (queue)
+    {
+        queue->next_element = temp;
+    }
+    queue = temp;
+}
+void Print_Begin(Queue* queue)
+{
+    if (queue)
+    {
+        cout << queue->value;
+        if (queue->next_element)
+        {
+            cout << "<--->";
+        }
+        Print_Begin(queue->next_element);
+    }
+}
+void Print_End(Queue* queue)
+{
+    if (queue)
+    {
+        cout << queue->value;
+        if (queue->prev_element)
+        {
+            cout << "<--->";
+        }
+        Print_End(queue->prev_element);
+    }
+}
+
+void Clear(Queue*& queue)
+{
+    if (queue)
+    {
+        Clear(queue->next_element);
+    }
+    delete queue;
+    queue = NULL;
+}
+
+Queue* FTE(Queue* queue)
+{
+    while (queue)
+    {
+        if (!queue->next_element)
+        {
+            return queue;
+        }
+        queue = queue->next_element;
+    }
+    return NULL;
+}
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    Queue* queue = NULL;
+    Queue* new_queue = NULL;
+    int avg = 0;
+    int sum = 0;
+    int counter = 0;
+    while (true)
+    {
+        int choice;
+        cout << "Создать очередь - 1\nДобавить элемент в очередь - 2\nПросмотреть очередь - 3\nИндивидуально задание - 4\nВыход из программы - 5 : ";
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+        {
+            Clear(queue);
+            int size, value;
+            cout << "Введите размер очереди: ";
+            cin >> size;
+            cout << "Введите числа: ";
+            for (int i = 0; i < size; i++)
+            {   
+                counter++;
+                cin >> value;
+                sum += value;
+                Push_Begin(queue, value);
+            }
+        }break;
+        case 2:
+        {
+            int choice, value;
+            cout << "Введите число: ";
+            cin >> value;
+            sum += value;
+            cout << "Добавить в начало очереди - 1\nДобавить в конец очереди - 2 : ";
+            cin >> choice;
+            switch (choice)
+            {
+            case 1:
+            {
+                Push_Begin(queue, value);
+                counter++;
+            } break;
+            case 2:
+            {
+                Create(queue, NULL, value);
+                counter++;
+            } break;
+            }
+        } break;
+        case 3:
+        {
+            int choice;
+            cout << "Просмотр с начала очереди - 1\nПросмотр с конца очереди - 2 : ";
+            cin >> choice;
+            switch (choice)
+            {
+            case 1:
+            {
+                Print_Begin(queue);
+                cout << endl;
+            } break;
+            case 2:
+            {
+                Print_End(FTE(queue));
+                cout << endl;
+            }break;
+            }
+        } break;
+        case 4:
+        {
+            int avgcounter = 0;
+            avg = sum / counter;
+            cout << "Среднее значение элементов стека = " << avg << endl;
+            Queue* k;
+            Queue* t = NULL;
+            k = queue;
+
+            for (int i = 0; i < counter; i++) {
+
+                if (k->value >= avg) {
+                    avgcounter++;
+                    Push_Begin(t, k->value);
+
+                }
+
+                k = k->next_element;
+
+            }
+            cout << "Количество элементов,меньших,чем авг: " << counter - avgcounter << endl;
+
+
+            Clear(k);
+            queue = t;
+
+            int choice;
+            cout << "Просмотр с начала очереди - 1\nПросмотр с конца очереди - 2 : ";
+            cin >> choice;
+            switch (choice)
+            {
+            case 1:
+            {
+                Print_Begin(queue);
+                cout << endl;
+            } break;
+            case 2:
+            {
+                Print_End(FTE(queue));
+                cout << endl;
+            }break;
+
+
+            Clear(queue);
+
+            }break;
+        }
+        case 5:
+        {
+            Clear(queue);
+            exit(0);
+        }
+        }
+    }
+}
