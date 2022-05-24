@@ -1,0 +1,81 @@
+// Determine eccentricity in an undirected graph
+
+#include <iostream>
+#include <queue>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+
+int main()
+{
+    for (int l = 1; l < 6; l++)
+    {
+        ifstream in;
+        string path = "rasch" + to_string(l) + ".txt";
+        in.open(path);
+
+        int n;
+        in >> n;
+        int** a = new int* [n];
+        for (int i = 0; i < n; i++)
+            a[i] = new int[n];
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                in >> a[i][j];
+            }
+        }
+        in.close();
+        vector<int> exc(n);
+        int  I;
+        for (int i = 0; i < n; i++)
+        {
+            queue <int> q;
+
+            vector<bool> used;
+            used.resize(n);
+            for (int j = 0; j < n; j++) used[j] = false;
+
+            vector<int> dst;
+            dst.resize(n);
+            for (int j = 0; j < n; j++) dst[j] = -1;
+
+            q.push(i);
+            used[i] = true;
+            dst[i] = 0;
+            while (!q.empty())
+            {
+                int v = q.front();
+                for (int j = 0; j < n; j++)
+                {
+                    if (a[v][j] == 1 && !used[j])
+                    {    
+                        
+                            used[j] = true;
+                            q.push(j);
+                            dst[j] = dst[v] + 1;
+                    }
+                }
+                q.pop();
+            }
+            int maxdst = dst[0];
+            for (int i = 1; i < n; i++)
+            {
+                if (dst[i] > maxdst) maxdst = dst[i];
+            }
+            exc[i] = maxdst;
+            I = i;
+            used.clear(); dst.clear();
+        }
+        cout << endl << "Excentrisitet " << l << " is " << exc[I] << endl;
+    }
+    return 0;
+}
+
+
+
+// Файлы называются rasch1.txt(2,3,4,5,6) и имеют внутри себя матрицы смежности 
