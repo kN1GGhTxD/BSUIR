@@ -1,0 +1,245 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <windows.h>
+using namespace std;
+class Person
+{
+private:
+    string name, group_number;
+    int year, physics_mark, math_mark, programming_mark, chemistry_mark;
+public:
+    string GetName()
+    {
+        return name;
+    }
+    int GetYear()
+    {
+        return year;
+    }
+    string GetGroup_number()
+    {
+        return group_number;
+    }
+    int GetPhysics_mark()
+    {
+        return physics_mark;
+    }
+    int GetMath_mark()
+    {
+        return math_mark;
+    }
+    int GetProgramming_mark()
+    {
+        return programming_mark;
+    }
+    int GetChemistry_mark()
+    {
+        return chemistry_mark;
+    }
+    void SetName(string _name)
+    {
+        name = _name;
+    }
+    void SetYear(int _year)
+    {
+        year = _year;
+    }
+    void SetGroup_number(string _group_number)
+    {
+        group_number = _group_number;
+    }
+    void SetPhysics_mark(int _physics_mark)
+    {
+        physics_mark = _physics_mark;
+    }
+    void SetMath_mark(int _math_mark)
+    {
+        math_mark = _math_mark;
+    }
+    void SetProgramming_mark(int _pogramming_mark)
+    {
+        programming_mark = _pogramming_mark;
+    }
+    void SetChemistry_mark(int _chemistry_mark)
+    {
+        chemistry_mark = _chemistry_mark;
+    }
+    void Print()
+    {
+        cout << "Фамилия: " << name << "\tгод рождения: " << year << "\tНомер группы: " << group_number << "\nБалл по физике: " << physics_mark << "\nБалл по математике: " << math_mark << "\nБалл по информатике: " << programming_mark << "\nБалл по химии: " << chemistry_mark << endl;
+        cout << "--------------------------------------------------------------------" << endl;
+    }
+};
+void Setter(int index, string name, string group_number, int year, int physics_mark, int math_mark, int programming_mark, int chemistry_mark, vector<Person>& person)
+{   
+    person[index].SetName(name);
+    person[index].SetGroup_number(group_number);
+    person[index].SetYear(year);
+    person[index].SetPhysics_mark(physics_mark);
+    person[index].SetMath_mark(math_mark);
+    person[index].SetProgramming_mark(programming_mark);
+    person[index].SetChemistry_mark(chemistry_mark);
+}
+void reading(vector<Person>& person)
+{
+    string name_file;
+    int number_students = 0;
+    cout << "Введите имя файла для чтения: ";
+    cin >> name_file;
+    ifstream in(name_file);
+    in >> number_students;
+    person.resize(number_students);
+    for (int i = 0; i < number_students; i++)
+    {
+        string first_name, second_name, group_number;
+        int year, physics_mark, math_mark, programming_mark, chemistry_mark;
+        in >> first_name >> second_name >> group_number >> year >> physics_mark >> math_mark >> programming_mark >> chemistry_mark;
+        Setter(i, first_name + " " + second_name, group_number, year, physics_mark, math_mark, programming_mark, chemistry_mark, person);
+    }
+    in.close();
+}
+void Adding(vector<Person>& person)
+{
+    string first_name, second_name, group_number;
+    int year, physics_mark, math_mark, programming_mark, chemistry_mark;
+    int number_students = person.size();
+    cout << "Введите фамилию и инициалы студента: ";
+    cin >> first_name >> second_name;
+    cout << "Введите номер группы: ";
+    cin >> group_number;
+    cout << "Введите год рождения: ";
+    cin >> year;
+    cout << "Введите отметки по физике, математике, информатике и химии: ";
+    cin >> physics_mark >> math_mark >> programming_mark >> chemistry_mark;
+    number_students++;
+    person.resize(number_students);
+    Setter(number_students - 1, first_name + " " + second_name, group_number, year, physics_mark, math_mark, programming_mark, chemistry_mark, person);
+}
+void Editing(vector<Person>& person, int index)
+{
+    string first_name, second_name, group_number;
+    int year, physics_mark, math_mark, programming_mark, chemistry_mark;
+    cout << "Введите фамилию и инициалы студента: ";
+    cin >> first_name >> second_name;
+    cout << "Введите номер группы: ";
+    cin >> group_number;
+    cout << "Введите год рождения: ";
+    cin >> year;
+    cout << "Введите отметки по физике, математике, информатике и химии: ";
+    cin >> physics_mark >> math_mark >> programming_mark >> chemistry_mark;
+    Setter(index, first_name + " " + second_name, group_number, year, physics_mark, math_mark, programming_mark, chemistry_mark, person);
+}
+void saving(vector<Person>& person)
+{
+    string name_file;
+    cout << "Введите название файла для сохранения: ";
+    cin >> name_file;
+    ofstream out(name_file);
+    out << person.size() << endl;
+    for (int i = 0; i < person.size(); i++)
+    {
+        out << person[i].GetName() << " ";
+        out << person[i].GetGroup_number() << " ";
+        out << person[i].GetYear() << " ";
+        out << person[i].GetPhysics_mark() << " ";
+        out << person[i].GetMath_mark() << " ";
+        out << person[i].GetProgramming_mark() << " ";
+        out << person[i].GetChemistry_mark();
+        out << endl;
+    }
+}
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    int number_students = 0;
+    vector<Person> person(number_students);
+    reading(person);
+    number_students = person.size();
+    while (true)
+    {
+        int choice;
+        cout << "Добавить студента - 1\nУдалить студента - 2\nИзменить информацию о студенте - 3\nПросмотр - 4\nВыйти с сохранением - 5\nВыйти без сохранения - 6\nЧтение с другого файла - 7:";
+        cin >> choice;
+        switch (choice)
+        {
+        case 1: 
+        {
+            Adding(person);
+        }break;
+        case 2: 
+        {
+            string first_name, second_name;
+            cout << "Введите фамилию и инициалы студента: ";
+            cin >> first_name >> second_name;
+            for (int i = 0; i < person.size(); i++)
+            {
+                if (person[i].GetName() == first_name + " " + second_name)
+                {
+                    person.erase(person.begin() + i);
+                    break;
+                }
+
+            }
+        } break;
+        case 3: 
+        {
+            string first_name, second_name;
+            cout << "Введите фамилию и инициалы студента: ";
+            cin >> first_name >> second_name;
+            for (int i = 0; i < person.size(); i++)
+            {
+                if (person[i].GetName() == first_name + " " + second_name)
+                {
+                    Editing(person, i);
+                    break;
+                }
+
+            }
+        } break;
+        case 4: 
+        {
+            int choice;
+            cout << "Просмотр всех студентов - 1\nПросмотр студентов,имеющих хотя бы одну неудовлетворительную оценку - 2: ";
+            cin >> choice;
+            switch (choice)
+            {
+            case 1:
+            {
+                for (int i = 0; i < person.size(); i++)
+                {
+                    person[i].Print();
+                }
+            }break;
+            case 2:
+            {
+               
+                for (int i = 0; i < person.size(); i++)
+                {
+                    if (person[i].GetChemistry_mark() < 4 || person[i].GetMath_mark() < 4 || person[i].GetPhysics_mark() < 4 || person[i].GetProgramming_mark() < 4)
+                    {
+                        person[i].Print();
+                    }
+                }
+
+            }
+            }
+        } break;
+        case 5: 
+        {
+            saving(person);
+        }
+        case 6: 
+        {
+            exit(0);
+        }
+        case 7: 
+        {
+            reading(person);
+        }
+        }
+    }
+    return 0;
+}
