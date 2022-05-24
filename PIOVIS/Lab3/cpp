@@ -1,0 +1,224 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <regex>
+#include <algorithm>
+
+using namespace std;
+
+class multiplicity
+{
+
+private:
+	string element;
+	bool already_used;
+
+public:
+
+	multiplicity() 
+	{
+		
+	}
+
+	multiplicity(string _element, bool _used)
+	{
+		element = _element;
+		already_used = _used;
+	}
+
+	string GetElement()
+	{
+		return element;
+	}
+
+	void SetElement(string _element)
+	{
+		element = _element;
+	}
+	
+	bool Already_Used()
+	{
+		return already_used;
+	}
+
+	void SetAlreadyUsed(bool _already_used)
+	{
+		already_used = _already_used;
+	}
+	bool operator== (multiplicity n1)
+	{
+		return element == n1.GetElement();
+	}
+};
+
+
+void Input(vector<vector<multiplicity>>& InputVector);
+void OutPut(vector<multiplicity>& OutPutVector);
+void Merge(vector<vector<multiplicity>>&InputVector, vector<multiplicity> &OutPutVector);
+bool IfFileIsNormal(string);
+//vector<multiplicity> cleaning(string);
+vector<multiplicity>parse(string);
+//bool equivalent(multiplicity* A, multiplicity* B);
+bool check(vector<string>,vector<string>);
+
+bool IfFileIsNormal(string name_file)
+{
+	int i = 0;
+	string multic;
+	ifstream in(name_file);
+	in.seekg(0, ios::end); 
+	if (!in.is_open()) 
+	{
+		cout << "Файл не найден!";
+		in.close();
+		return false;
+	}
+	if (in.tellg() == 0)
+	{
+		cout << "Файл пустой!";
+		in.close();
+		return false;
+	}
+	in.seekg(0, ios::beg); 
+	while (getline(in, multic))
+	{
+		i++;
+		if (multic[0] != '{' || multic[multic.size() - 1] != '}') 
+		{
+			cout << "Пропущен символ \'{\' или \'}\'\n";
+			cout << "Номер строки: " << i;
+			in.close();
+			return false;
+		}
+		else if (multic.find(' ') != string::npos) 
+		{
+			cout << "Обнаружен пробел в строке: " << i;
+			in.close();
+			return false;
+		}
+		else if (multic[1] == ',') 
+		{
+			cout << "Неккоректный ввод в строке: " << i;
+			in.close();
+			return false;
+		}
+		else 
+		{
+			for (int j = 0; j < multic.size() - 1; j++)
+			{
+				if ((multic[j] == ',' && multic[j + 1] == ',') || (isdigit(multic[j]) && multic[j + 1] == '{') || (multic[j] == ',' && multic[j + 1] == '}'))
+				{
+					cout << "Неккоректный ввод в строке: " << i;
+					in.close();
+					return false;
+				}
+			}
+		}
+	}
+	in.close();
+	return true; 
+
+}
+
+bool check(vector<string> A, vector<string> B)
+{
+	sort(A.begin(), A.end());
+	sort(B.begin(), B.end());
+	if ( A == B) return true;
+	return false;
+}
+
+void Reading(vector<vector<multiplicity>>& container, string name_file)
+{
+	string multic;
+	ifstream in(name_file);
+	while (getline(in, multic))
+	{
+		container.push_back(parse(multic));
+	}
+	in.close();
+}
+
+vector<multiplicity> parse(std::string context) {
+
+	std::vector<std::string> elements;
+	context = context.substr(1, context.size() - 2);
+
+	int countNoOrOpen = 0, countNoOrClose = 0, countOrOpen = 0, countOrClose = 0;
+	for (char a : context) {
+		if (a == '<') countOrOpen++;
+		else if (a == '{')  countNoOrOpen++;
+		else if (a == '>')  countOrClose++;
+		else if (a == '}') countNoOrClose++;
+	}
+
+	if (countNoOrOpen != countNoOrClose || countOrOpen != countOrClose) {
+		std::cout << "Error input";
+	}
+
+	int start = 0, i = 0;
+	while (i < context.size())
+	{
+		if (context.at(i) == '{') {
+			start = i;
+			while (true) {
+				if (context.at(i) == '{') {
+					countNoOrOpen--;
+				}
+				else if (context.at(i) == '<') {
+					countOrOpen--;
+				}
+				else if (context.at(i) == '>') {
+					countOrClose--;
+				}
+				else if (context.at(i) == '}') {
+					countNoOrClose--;
+					if (countNoOrOpen == countNoOrClose) break;
+				}
+				i++;
+			}
+			elements.push_back(context.substr(start, i - start + 1));
+			if (i + 1 < context.size())i++;
+			start = i + 1;
+		}
+		else if (context.at(i) == '<') {
+			start = i;
+			while (true) {
+				if (context.at(i) == '<') {
+					countOrOpen--;
+				}
+				else if (context.at(i) == '{') {
+					countNoOrOpen--;
+				}
+				else if (context.at(i) == '}') {
+					countNoOrClose--;
+				}
+				else if (context.at(i) == '>') {
+					countOrClose--;
+					if (countOrOpen == countOrClose) break;
+				}
+				i++;
+			}
+			elements.push_back(context.substr(start, i - start + 1));
+			if (i + 1 < context.size())i++;
+			start = i + 1;
+		}
+		else if (context.at(i) == ',') {
+			elements.push_back(context.substr(start, i - start));
+			start = i + 1;
+		}
+		else if (i == context.size() - 1) {
+			elements.push_back(context.substr(start));
+		}
+		i++;
+	}
+
+
+	vector<multiplicity> temp;
+	for (string str : elements) {
+		temp.push_back(multiplicity(str, false));
+	}
+
+	return temp;
+}
