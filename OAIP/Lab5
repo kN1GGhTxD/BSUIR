@@ -1,0 +1,201 @@
+#include <iostream>
+using namespace std;
+struct Stack
+{
+    int value;
+    Stack* next_element;
+};
+void Push(Stack*&, int);
+void Pop(Stack*&);
+void Print(Stack*);
+void Sort_1(Stack**);
+void Sort_2(Stack*);
+void ExtraTask(Stack*, Stack*&);
+void Clear(Stack*&);
+int MaxNumber(Stack*, int);
+//----------------------------------------------------
+void Push(Stack*& stack, int value)
+{
+    Stack* temp_stack = NULL;
+    temp_stack = new Stack;
+    temp_stack->value = value;
+    temp_stack->next_element = stack;
+    stack = temp_stack;
+}
+void Pop(Stack*& stack)
+{
+    Stack* temp;
+    temp = stack;
+    stack = stack->next_element;
+    delete temp;
+}
+void Clear(Stack*& stack)
+{
+    Stack* temp;
+    while (stack)
+    {
+        temp = stack;
+        stack = stack->next_element;
+        delete temp;
+    }
+}
+void Print(Stack* stack) {
+
+    std::cout << "Stack:  ";
+
+    Stack* Out = stack;
+
+    while (Out != NULL) {
+        std::cout << Out->value << "  ";
+        Out = Out->next_element;
+    }
+
+    std::cout << std::endl;
+}
+void Sort_1(Stack** stack)
+{
+    Stack* limit = NULL, * temp_stack, * temp;
+    if ((*stack)->next_element->next_element == NULL) return;
+    do {
+        for (temp_stack = *stack; temp_stack->next_element->next_element != limit; temp_stack = temp_stack->next_element)
+            if (temp_stack->next_element->value > temp_stack->next_element->next_element->value) {
+                temp = temp_stack->next_element->next_element;
+                temp_stack->next_element->next_element = temp->next_element;
+                temp->next_element = temp_stack->next_element;
+                temp_stack->next_element = temp;
+            }
+        limit = temp_stack->next_element;
+    } while ((*stack)->next_element->next_element != limit);
+}
+void Sort_2(Stack* stack)
+{
+    Stack* limit = NULL, * temp_stack;
+    int value;
+    do {
+        for (temp_stack = stack; temp_stack->next_element != limit; temp_stack = temp_stack->next_element)
+            if (temp_stack->value > temp_stack->next_element->value) {
+                value = temp_stack->value;
+                temp_stack->value = temp_stack->next_element->value;
+                temp_stack->next_element->value = value;
+            }
+        limit = temp_stack;
+    } while (stack->next_element != limit);
+}
+int MaxNumber(Stack* stack, int max)
+{
+    while (stack)
+    {
+        if (stack->value > max)
+        {
+            max = stack->value;
+        }
+        stack = stack->next_element;
+    }
+    return max;
+}
+void ExtraTask(Stack* stack, Stack*& new_stack)
+{
+    int max = MaxNumber(stack, 0);
+    if (stack->value == max || stack->next_element->value == max)
+    {
+        return;
+    }
+    Stack* temp_old = stack->next_element, * old_stack = stack, * temp_new = stack->next_element;
+    new_stack = temp_new;
+    for (temp_old; temp_old ; temp_old = temp_old->next_element)
+    {
+        if (temp_old->value == max)
+        {
+           old_stack->next_element = temp_old;
+        }
+    }
+    for (temp_new; temp_new->next_element; temp_new = temp_new->next_element)
+    {
+        if (temp_new->next_element->value == max)
+        {
+            temp_new->next_element = NULL;
+            break;
+        }
+    }
+}
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    Stack* stack = NULL;
+    while (true)
+    {
+        int choice;
+        cout << "Создать стек - 1\nДобавить элемент в стек - 2\nИзвлечь элемент из стека - 3\nПросмотреть стек - 4\nСортировка стека - 5\nИндивидуальное задание - 6\nВыйти из программы - 7 : ";
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+        {
+            Clear(stack);
+            int size, value;
+            cout << "Размер стека: ";
+            cin >> size;
+            cout << "Введите числа: ";
+            for (int i = 0; i < size; i++)
+            {
+                cin >> value;
+                Push(stack, value);
+            }
+        } break;
+        case 2:
+        {
+            int value;
+            cout << "Введите число: ";
+            cin >> value;
+            Push(stack, value);
+        } break;
+        case 3:
+        {
+            Pop(stack);
+        } break;
+        case 4:
+        {
+            Print(stack);
+            cout << endl;
+        } break;
+        case 5:
+        {
+            int choice;
+            cout << "Сортировка указателями - 1\nСортировка заменой значений - 2 : ";
+            cin >> choice;
+            switch (choice)
+            {
+            case 1:
+            {
+                Stack* temp_stack = NULL;
+                temp_stack = new Stack;
+                temp_stack->value = 0;
+                temp_stack->next_element = stack;
+                Sort_1(&temp_stack);
+                stack = temp_stack->next_element;
+                Sort_1(&stack);
+            } break;
+            case 2:
+            {
+                Sort_2(stack);
+            }
+            }
+        } break;
+        case 6:
+        {
+            Stack* new_stack = NULL;
+            ExtraTask(stack, new_stack);
+            cout << "Старый стек: ";
+            Print(stack);
+            cout << "\nНовый стек: ";
+            Print(new_stack);
+            cout << endl;
+        } break;
+        case 7:
+        {
+            Clear(stack);
+            exit(0);
+        }
+        }
+    }
+}
